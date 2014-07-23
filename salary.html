@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>Salary Calculator</title>
+<style>
+body {font-family: Helvetica;}
+#annual {background-color: #eee; padding: 4px; border-radius: 4px;}
+#poverty {background-color: #eee; padding: 4px; border-radius: 4px;}
+.above {background-color: #cfc !important;}
+.below {background-color: #fcc !important;}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/bacon.js/0.7.18/Bacon.min.js"></script>
+</head>
+<body>
+
+<h1>Bringing Home the Bacon.js</h1>
+
+<p>If you earn <input type="text" id="hourly" size="7"> per hour,
+that works out to be <span id="annual">0.00</span> annually. 
+That is <span id="poverty">below</span> the 2014 US Federal Poverty designation for a household of one in the 48 contiguous states.</p>
+
+<script>
+
+// Observe keyup events typed into the hourly field.
+var hourlyStream = $('#hourly').asEventStream('keyup').map(function(event) {
+	// Convert to annual rate.
+	var hourly = parseFloat(event.target.value) || 0.0;
+	return (hourly * 52 * 40).toFixed(2);
+});
+
+var povertyStatusStream = hourlyStream.map(function(string){
+	var annual = parseFloat(string) || 0.0;
+	return (annual > 11670) ? "above" : "below";
+});
+
+// Show the annual calculation each time the hourly value is changed.
+hourlyStream.assign($('#annual'), 'text');
+
+// This sets the text of the span to 'above' or 'below'.
+povertyStatusStream.assign($('#poverty'), 'text');
+
+// This applies the 'above' or 'below' class to the span.
+povertyStatusStream.assign($('#poverty'), 'attr', 'class');
+
+</script>
+
+</body>
+</html>
