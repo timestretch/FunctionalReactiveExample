@@ -23,25 +23,25 @@ Mouse Is Down: <span id="mouseIsDown">false</span>
 $(function(){
 
 	$( "#drag1" ).draggable();
-    var html  = $("html");
-    
-    var blockDragging = $( "#drag1" ).asEventStream('mousedown').map(true)
-                             .merge(html.asEventStream('mouseup').map(false))
-                             .toProperty(false);
-    
+	var html  = $("html");
+	
+	var blockDragging = $( "#drag1" ).asEventStream('mousedown').map(true)
+							 .merge(html.asEventStream('mouseup').map(false))
+							 .toProperty(false);
+	
 	var location = $( "#drag1" ).asEventStream('mousemove')
-     	.filter(blockDragging)
-     	.map(function(e){
-     		return [e.clientX, e.clientY];
+		.filter(blockDragging)
+		.map(function(e){
+			return [e.clientX, e.clientY];
 		});
 
-    var mouseIsDown = blockDragging.map(function(state){
-    	return state ? "true" : "false";
-    });
-    
-    var locationAsString = location.map(function(loc){
-    	return 'x:' + loc[0] + ' y:' + loc[1];
-    });
+	var mouseIsDown = blockDragging.map(function(state){
+		return state ? "true" : "false";
+	});
+	
+	var locationAsString = location.map(function(loc){
+		return 'x:' + loc[0] + ' y:' + loc[1];
+	});
 
 	mouseIsDown.assign( $("#mouseIsDown"), 'text');
 	locationAsString.assign( $("#loc"), 'text');
