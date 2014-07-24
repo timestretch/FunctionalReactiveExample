@@ -18,13 +18,11 @@ body {font-family: Helvetica;}
 <script>
 
 var aaStream = $('#aa').asEventStream('keyup').map(function(event) {
-	// Convert to annual rate.
 	var aa = parseFloat(event.target.value) || 0.0;
 	return 100 - aa;
 });
 
 var bbStream = $('#bb').asEventStream('keyup').map(function(event) {
-	// Convert to annual rate.
 	var bb = parseFloat(event.target.value) || 0.0;
 	return 100 - bb;
 });
