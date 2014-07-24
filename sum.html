@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Sum</title>
+<style>
+body {font-family: Helvetica;}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/bacon.js/0.7.18/Bacon.min.js"></script>
+</head>
+<body>
+
+<h1>A + B = 100</h1>
+
+<p>Try changing one of the numbers below:</p>
+
+<p><input type="text" id="aa" size="7" value="50"> + <input type="text" id="bb" size="7" value="50"> = 100.</p>
+
+<script>
+
+var aaStream = $('#aa').asEventStream('keyup').map(function(event) {
+	// Convert to annual rate.
+	var aa = parseFloat(event.target.value) || 0.0;
+	return 100 - aa;
+});
+
+var bbStream = $('#bb').asEventStream('keyup').map(function(event) {
+	// Convert to annual rate.
+	var bb = parseFloat(event.target.value) || 0.0;
+	return 100 - bb;
+});
+
+// Show the annual calculation each time the hourly value is changed.
+aaStream.assign($('#bb'), 'val');
+bbStream.assign($('#aa'), 'val');
+
+</script>
+
+</body>
+</html>

@@ -1,9 +1,17 @@
 Simple bacon.js examples of Functional Reactive Programming in Javascript
 ------------------------------------------------------------------------
 
+_salary.html_
+
 The salary example calculates an annual salary given an hourly rate. It also shows if you are above or below the US poverty level, and sets a class on a span accordingly. Who needs Excel?
 
+_drag.html_
+
 The drag example shows a draggable span, updated with the state of whether it is dragging and the x and y location of the cursor.
+
+_sum.html_
+
+The sum of the inputs in two text fields must add up to 100.
 
 References
 ----------
