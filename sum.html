@@ -29,7 +29,7 @@ var bbStream = $('#bb').asEventStream('keyup').map(function(event) {
 	return 100 - bb;
 });
 
-// Show the annual calculation each time the hourly value is changed.
+// Assign them in both directions:
 aaStream.assign($('#bb'), 'val');
 bbStream.assign($('#aa'), 'val');
 
