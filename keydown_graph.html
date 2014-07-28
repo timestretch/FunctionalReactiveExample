@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Key Down Graph</title>
+<style>
+body {font-family: Helvetica;}
+.chart {float: left; display: block; background-color: #008;}
+div {margin-bottom: 1px;}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/bacon.js/0.7.18/Bacon.min.js"></script>
+</head>
+<body>
+
+<h1>Key Down Graph</h1>
+
+<p>Type some keys, fairly quickly for a few seconds. The previous 10 seconds of key down events is shown as rolling histogram with one second bins.</p>
+
+<script>
+
+$(function(){
+	var tick = Bacon.interval(1000)
+
+	// Create a cumulative counter of key down events.
+	
+	var keys = $(document).asEventStream('keydown')
+		.map(1)
+		.scan(0, function(a, b) {
+			return a + b;
+		});
+	
+	// Calculate the difference between the new value and previous value
+	// using sliding window of the last two values.
+	// Generate one bar for a bar chart with map.
+	
+	var graph = keys.sampledBy(tick)
+		.slidingWindow(2,2)
+		.map(function(val) {
+			var a = val[0]
+			var b = val[1]
+			var diff = b - a
+			return "<div><span class='chart' style='width:" + diff * 5 + "px;'>&nbsp;</span>&nbsp;" + diff + "</div>"
+		});
+	
+	// Make a sliding window of the last n samples. 
+	// Join the last n samples together
+	// and shove the html into a div.
+	
+	graph.slidingWindow(10,0)
+		.map(function(n){
+			return n.join('');
+		})
+		.assign($("#graph"), 'html')
+
+});
+
+</script>
+
+<div id="graph">
+</div>
+
+</body>
+</html>
