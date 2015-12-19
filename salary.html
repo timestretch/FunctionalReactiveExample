@@ -2,11 +2,20 @@
 <head>
 <title>Salary Calculator</title>
 <style>
-body {font-family: Helvetica;}
-#annual {background-color: #eee; padding: 4px; border-radius: 4px;}
-#poverty {background-color: #eee; padding: 4px; border-radius: 4px;}
+body {font-family: Helvetica; line-height: 2;}
+input {font-family: Helvetica; font-size: 14px;}
+
+#hourly {background-color: #eee; padding: 8px; border-radius: 8px; border: 1px solid #CCC; font-weight: bold;}
+#annual {background-color: #eee; padding: 8px; border-radius: 8px; border: 1px solid #CCC; font-weight: bold;}
+#poverty {background-color: #eee; padding: 8px; border-radius: 8px;}
+
+input:focus {outline: 0; outline: none;}
+
 .above {background-color: #cfc !important;}
 .below {background-color: #fcc !important;}
+
+.focused {background-color: #ffc !important;}
+.unfocused {background-color: #eee !important;}
 </style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/bacon.js/0.7.18/Bacon.min.js"></script>
@@ -15,26 +24,66 @@ body {font-family: Helvetica;}
 
 <h1>Bringing Home the Bacon.js</h1>
 
-<p>If you earn <input type="text" id="hourly" size="7"> per hour,
-that works out to be <span id="annual">0.00</span> annually. 
-That is <span id="poverty">below</span> the 2014 US Federal Poverty designation for a household of one in the 48 contiguous states.</p>
+<p>Hourly Rate: <input type="text" id="hourly" size="10"> &times; 52 weeks &times; 
+40 hours each week = <input type="text" id="annual" size="10"> annually.</p>
 
+<p>That is <span id="poverty">below</span> the 2015 US Federal Poverty designation for a 
+household of one in the 48 contiguous states.</p>
+
+<p id="focused"></p>
 <script>
 
-// Observe keyup events typed into the hourly field.
-var hourlyStream = $('#hourly').asEventStream('keyup').map(function(event) {
-	// Convert to annual rate.
-	var hourly = parseFloat(event.target.value) || 0.0;
-	return (hourly * 52 * 40).toFixed(2);
+function highlightFocusAndReturnStream(textFieldName) {
+	var blur = $(textFieldName).asEventStream('blur').map(false);
+	var focus =  $(textFieldName).asEventStream('focus').map(true);
+
+	var isFocused = focus.merge(blur).toProperty(false);
+
+	// Show the highlighted field in yellow.
+	isFocused.map(function(val) {
+		return val ? "focused" : "unfocused";
+	}).assign($(textFieldName), 'attr', 'class');
+
+	return isFocused;
+}
+
+var isHourlyFocused = highlightFocusAndReturnStream('#hourly');
+var isAnnuallyFocused = highlightFocusAndReturnStream('#annual');
+
+// Send an update through the stream on each keyup
+var perHourStream = $('#hourly').asEventStream('keyup').map(function(event) {
+	return event.target.value;
 });
 
-var povertyStatusStream = hourlyStream.map(function(string){
-	var annual = parseFloat(string) || 0.0;
-	return (annual > 11670) ? "above" : "below";
+var perYearStream = $('#annual').asEventStream('keyup').map(function(event) {
+	return event.target.value;
 });
 
-// Show the annual calculation each time the hourly value is changed.
-hourlyStream.assign($('#annual'), 'text');
+function id(x) {
+	return x;
+}
+
+var perHour = Bacon.when(
+	[perHourStream], id,
+	[perYearStream], function(x) { return (x / 2080) });
+
+var perYear = Bacon.when(
+	[perYearStream], id,
+	[perHourStream], function(x) { return (x * 2080) });
+
+// When assigning updated values, ignore the field if it has focus using
+// filter. The not() reverses the boolean value before filtering.
+perHour.filter(isHourlyFocused.not()).map(function(x) {
+	return (parseFloat(x) || 0.0).toFixed(2);
+}).assign($('#hourly'), 'val');
+
+perYear.filter(isAnnuallyFocused.not()).map(function(x) {
+	return (parseFloat(x) || 0.0).toFixed(2);
+}).assign($('#annual'), 'val');
+
+var povertyStatusStream = perYear.map(function(input){
+	return (input > 11770) ? "above" : "below";
+});
 
 // This sets the text of the span to 'above' or 'below'.
 povertyStatusStream.assign($('#poverty'), 'text');
